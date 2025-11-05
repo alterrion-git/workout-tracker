@@ -259,7 +259,7 @@
                         onChange: (ev) => handleManualChange(ev.target.value),
                         onBlur: handleManualBlur,
                         autoFocus: true,
-                        className: 'w-28 h-28 text-4xl font-bold text-center bg-gray-800 rounded-full border-4 border-green-600 outline-none'
+                        className: 'w-32 h-32 text-4xl font-bold text-center bg-gray-800 rounded-full border-4 border-green-600 outline-none'
                     })
                 );
             }
@@ -623,33 +623,30 @@
 
                 return e('div', { className: 'min-h-screen bg-gray-900 text-white flex items-center justify-center p-4' },
                     e('div', { className: 'w-full max-w-6xl flex flex-col justify-center' },
-                        e('div', { className: 'bg-blue-900 bg-opacity-20 p-4 rounded-lg mb-4' },
-                            e('div', { className: 'flex items-center justify-between mb-3' },
+                        e('div', { className: 'bg-blue-900 bg-opacity-20 p-3 rounded-lg mb-4' },
+                            e('div', { className: 'flex items-center justify-between' },
                                 e('button', {
                                     onClick: finishWorkout,
-                                    className: 'p-2 hover:bg-gray-800 rounded'
+                                    className: 'p-2 hover:bg-gray-800 rounded absolute left-2'
                                 }, e(ArrowLeft, { size: 24 })),
-                                e('div', { className: 'flex items-center gap-12' },
-                                    e('div', null,
+                                e('div', { className: 'flex-1 flex items-center justify-center gap-12' },
+                                    e('div', { className: 'text-center' },
                                         e('div', { className: 'text-2xl font-bold' }, liveWorkout.day),
                                         e('div', { className: 'text-lg text-gray-400' }, liveWorkout.name)
                                     ),
                                     e('div', { className: 'text-sm text-gray-400' }, `Total: ${formatTime(totalElapsedTime)}`)
                                 ),
-                                e('div', { className: 'text-right' },
+                                e('div', { className: 'text-right absolute right-2' },
                                     e('div', { className: 'text-sm text-gray-400' }, 'Sets Left'),
                                     e('div', { className: 'text-2xl font-bold' }, getTotalSetsRemaining())
                                 )
-                            ),
-                            e('div', { className: 'flex justify-center' },
-                                e('div', { className: 'w-2/3 h-1 bg-blue-600 rounded' })
                             )
                         ),
                         e('div', { className: 'text-center mb-3' },
                             e('div', { className: 'text-3xl font-bold mb-1' }, currentExercise.name),
                             e('div', { className: 'text-xl text-gray-400' }, `Set ${currentSetIndex + 1} of ${currentExercise.sets.length}`)
                         ),
-                        e('div', { className: 'flex items-center justify-center gap-4' },
+                        e('div', { className: 'flex items-center justify-center gap-3' },
                             e(CustomNumberInput, {
                                 value: currentSet.reps,
                                 onChange: (val) => updateLiveSet('reps', val),
@@ -690,15 +687,21 @@
             }
 
             const today = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
-            const currentDate = new Date().toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-            });
+            const currentDate = new Date();
+            
+            const getDateForDay = (dayName) => {
+                const todayIndex = DAYS.indexOf(today);
+                const targetIndex = DAYS.indexOf(dayName);
+                const dayDiff = targetIndex - todayIndex;
+                const targetDate = new Date(currentDate);
+                targetDate.setDate(currentDate.getDate() + dayDiff);
+                const day = targetDate.getDate().toString().padStart(2, '0');
+                const month = (targetDate.getMonth() + 1).toString().padStart(2, '0');
+                return `${day}/${month}`;
+            };
 
             return e('div', { className: 'min-h-screen bg-gray-900 text-white p-6' },
                 e('div', { className: 'max-w-6xl mx-auto' },
-                    e('h1', { className: 'text-3xl font-bold mb-8 text-center' }, 'Weekly Workout Schedule'),
                     e('div', { className: 'grid grid-cols-2 gap-4' },
                         DAYS.map((day) => {
                             const workout = workouts[day];
@@ -707,16 +710,15 @@
 
                             return e('div', {
                                 key: day,
-                                className: `p-6 rounded-lg ${isToday ? 'bg-blue-900 border-2 border-blue-500' : 'bg-gray-800'}`
+                                className: `p-6 rounded-lg relative ${isToday ? 'bg-blue-900 border-2 border-blue-500' : 'bg-gray-800'}`
                             },
-                                e('div', { className: 'flex items-center justify-between mb-3' },
+                                e('div', { className: 'absolute top-2 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-white text-gray-900 rounded text-xs font-bold' }, 
+                                    getDateForDay(day)
+                                ),
+                                e('div', { className: 'flex items-center justify-between mt-6' },
                                     e('div', { className: 'flex-1' },
-                                        e('div', { className: 'flex items-center gap-3' },
-                                            e('h2', { className: 'text-xl font-bold' }, day),
-                                            isToday && e('span', { className: 'px-2 py-1 bg-blue-500 rounded text-xs' }, 'Today')
-                                        ),
-                                        e('div', { className: 'text-gray-400 text-sm mt-1' }, workout ? workout.name : 'Rest'),
-                                        e('div', { className: 'text-gray-500 text-xs mt-1 h-4' }, isToday ? currentDate : '')
+                                        e('h2', { className: 'text-xl font-bold' }, day),
+                                        e('div', { className: 'text-gray-400 text-sm mt-1' }, workout ? workout.name : 'Rest')
                                     )
                                 ),
                                 e('div', { className: 'flex items-center gap-2 justify-end' },
