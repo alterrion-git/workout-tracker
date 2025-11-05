@@ -4,7 +4,7 @@
   "description": "Personal workout tracking app",
   "start_url": "/index.html",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#111827",
   "theme_color": "#111827",
   "orientation": "landscape",
