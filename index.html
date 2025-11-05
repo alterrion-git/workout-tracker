@@ -35,7 +35,7 @@
             width: 100%;
             height: 100vh;
             height: 100dvh;
-            font-size: 20px;
+            font-size: 22px;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
         
@@ -116,32 +116,11 @@
             });
         }
         
-        // Prevent address bar from showing and maintain fullscreen
+        // Hide address bar on load
         window.addEventListener('load', () => {
-            // Initial hide
             setTimeout(() => {
                 window.scrollTo(0, 1);
             }, 100);
-            
-            // Prevent pull-to-refresh and overscroll
-            document.body.addEventListener('touchmove', (e) => {
-                if (e.touches.length > 1) return; // Allow pinch zoom
-                const target = e.target;
-                const scrollable = target.closest('#root');
-                if (!scrollable || scrollable.scrollTop === 0) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-            
-            // Lock viewport on any scroll attempt
-            let lastScrollTop = 0;
-            window.addEventListener('scroll', () => {
-                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                if (scrollTop !== lastScrollTop) {
-                    window.scrollTo(0, 1);
-                    lastScrollTop = 1;
-                }
-            }, { passive: false });
         });
 
         const { useState, useEffect, useRef } = React;
@@ -694,7 +673,7 @@
                                     e('div', { className: 'text-2xl font-bold' }, liveWorkout.day),
                                     e('div', { className: 'text-xl text-gray-400' }, liveWorkout.name)
                                 ),
-                                e('div', { className: 'text-base text-gray-400' }, `Total: ${formatTime(totalElapsedTime)}`)
+                                e('div', { className: 'text-xl text-gray-400' }, `Total: ${formatTime(totalElapsedTime)}`)
                             ),
                             e('div', { className: 'text-right pr-2' },
                                 e('div', { className: 'text-base text-gray-400' }, 'Sets Left'),
@@ -702,8 +681,8 @@
                             )
                         )
                     ),
-                    e('div', { className: 'flex-1 flex flex-col justify-center pt-2 px-4 pb-4' },
-                        e('div', { className: 'flex items-start justify-between mb-3' },
+                    e('div', { className: 'flex-1 flex flex-col justify-center pt-1 px-4 pb-4' },
+                        e('div', { className: 'flex items-start justify-between mb-1' },
                             e('div', { className: 'text-left pl-4' },
                                 e('div', { className: 'text-3xl font-bold' }, currentExercise.name),
                                 e('div', { className: 'text-xl text-gray-400' }, `Set ${currentSetIndex + 1} of ${currentExercise.sets.length}`)
@@ -763,7 +742,7 @@
             };
 
             return e('div', { className: 'min-h-screen bg-gray-900 text-white p-6' },
-                e('div', { className: 'absolute top-2 right-2 text-xs text-gray-600' }, 'v2.0'),
+                e('div', { className: 'absolute top-2 right-2 text-xs text-gray-600' }, 'v2.1'),
                 e('div', { className: 'max-w-6xl mx-auto' },
                     e('div', { className: 'grid grid-cols-2 gap-4' },
                         DAYS.map((day) => {
