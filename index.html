@@ -420,7 +420,9 @@
 
             const updateSet = (exerciseIndex, setIndex, field, value) => {
                 const newExercises = [...editingWorkout.exercises];
-                newExercises[exerciseIndex].sets[setIndex][field] = parseFloat(value) || 0;
+                // Allow empty string and convert to 0 only when needed
+                const parsedValue = value === '' ? 0 : parseFloat(value);
+                newExercises[exerciseIndex].sets[setIndex][field] = isNaN(parsedValue) ? 0 : parsedValue;
                 setEditingWorkout({ ...editingWorkout, exercises: newExercises });
             };
 
@@ -612,7 +614,7 @@
                                             e('span', { className: 'text-gray-400 w-12' }, `Set ${setIdx + 1}`),
                                             e('input', {
                                                 type: 'number',
-                                                value: set.reps,
+                                                value: set.reps || '',
                                                 onChange: (ev) => updateSet(exIdx, setIdx, 'reps', ev.target.value),
                                                 onKeyDown: (ev) => {
                                                     if (ev.key === 'Enter') {
@@ -625,7 +627,7 @@
                                             e('input', {
                                                 type: 'number',
                                                 step: '0.01',
-                                                value: set.weight,
+                                                value: set.weight || '',
                                                 onChange: (ev) => updateSet(exIdx, setIdx, 'weight', ev.target.value),
                                                 onKeyDown: (ev) => {
                                                     if (ev.key === 'Enter') {
@@ -681,8 +683,8 @@
                             )
                         )
                     ),
-                    e('div', { className: 'flex-1 flex flex-col justify-center pt-1 px-4 pb-4' },
-                        e('div', { className: 'flex items-start justify-between mb-1' },
+                    e('div', { className: 'flex-1 flex flex-col justify-center px-4 pb-4' },
+                        e('div', { className: 'flex items-start justify-between mb-2' },
                             e('div', { className: 'text-left pl-4' },
                                 e('div', { className: 'text-3xl font-bold' }, currentExercise.name),
                                 e('div', { className: 'text-xl text-gray-400' }, `Set ${currentSetIndex + 1} of ${currentExercise.sets.length}`)
@@ -742,7 +744,6 @@
             };
 
             return e('div', { className: 'min-h-screen bg-gray-900 text-white p-6' },
-                e('div', { className: 'absolute top-2 right-2 text-xs text-gray-600' }, 'v2.1'),
                 e('div', { className: 'max-w-6xl mx-auto' },
                     e('div', { className: 'grid grid-cols-2 gap-4' },
                         DAYS.map((day) => {
