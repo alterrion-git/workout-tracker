@@ -108,9 +108,10 @@
     
     <script>
         // Register service worker for PWA
+        const APP_VERSION = '2.2.0'; // Update this with each new version!
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(() => {
+                navigator.serviceWorker.register(`sw.js?v=${APP_VERSION}`).catch(() => {
                     console.log('Service worker registration failed');
                 });
             });
