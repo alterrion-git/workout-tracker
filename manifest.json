@@ -1,8 +1,8 @@
 {
   "name": "Workout Tracker",
-  "short_name": "Workout",
-  "start_url": "alterrion-git.github.io/",
-  "scope": "alterrion-git.github.io/",
+  "short_name": "Workout2",
+  "start_url": "https://alterrion-git.github.io/",
+  "scope": "https://alterrion-git.github.io/",
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone"],
   "background_color": "#111827",
