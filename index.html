@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Workout">
     <meta name="theme-color" content="#111827">
+    <meta name="screen-orientation" content="portrait">
     <link rel="manifest" href="manifest.json">
     <title>Workout Tracker</title>
     <style>
@@ -37,6 +38,7 @@
             height: 100dvh;
             font-size: 22px;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            touch-action: manipulation; /* Prevents double-tap zoom */
         }
         
         #root {
@@ -108,7 +110,7 @@
     
     <script>
         // Register service worker for PWA
-        const APP_VERSION = '2.3.0'; // Update this with each new version!
+        const APP_VERSION = '2.4.0'; // Update this with each new version!
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register(`sw.js?v=${APP_VERSION}`).catch(() => {
@@ -122,6 +124,24 @@
             setTimeout(() => {
                 window.scrollTo(0, 1);
             }, 100);
+        });
+
+        // Handle orientation changes to prevent zoom issues
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                window.scrollTo(0, 1);
+                // Force viewport recalculation
+                document.body.style.height = window.innerHeight + 'px';
+                setTimeout(() => {
+                    document.body.style.height = '100dvh';
+                }, 100);
+            }, 100);
+        });
+
+        // Force proper viewport on resize
+        window.addEventListener('resize', () => {
+            const viewport = document.querySelector('meta[name=viewport]');
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
         });
 
         const { useState, useEffect, useRef } = React;
@@ -382,6 +402,7 @@
                     name: '',
                     exercises: [{
                         name: '',
+                        notes: '',
                         sets: [
                             { reps: 0, weight: 0 },
                             { reps: 0, weight: 0 }
@@ -398,6 +419,7 @@
                         ...editingWorkout.exercises,
                         {
                             name: '',
+                            notes: '',
                             sets: [
                                 { reps: 0, weight: 0 },
                                 { reps: 0, weight: 0 }
@@ -416,6 +438,12 @@
             const updateExerciseName = (exerciseIndex, name) => {
                 const newExercises = [...editingWorkout.exercises];
                 newExercises[exerciseIndex].name = name;
+                setEditingWorkout({ ...editingWorkout, exercises: newExercises });
+            };
+
+            const updateExerciseNotes = (exerciseIndex, notes) => {
+                const newExercises = [...editingWorkout.exercises];
+                newExercises[exerciseIndex].notes = notes;
                 setEditingWorkout({ ...editingWorkout, exercises: newExercises });
             };
 
@@ -609,6 +637,20 @@
                                         className: 'ml-2 px-3 py-2 bg-red-600 rounded hover:bg-red-700 text-sm'
                                     }, 'Remove')
                                 ),
+                                e('div', { className: 'mb-4' },
+                                    e('input', {
+                                        type: 'text',
+                                        value: exercise.notes || '',
+                                        onChange: (ev) => updateExerciseNotes(exIdx, ev.target.value),
+                                        onKeyDown: (ev) => {
+                                            if (ev.key === 'Enter') {
+                                                ev.target.blur();
+                                            }
+                                        },
+                                        className: 'w-full p-2 bg-gray-700 rounded border border-gray-600 focus:border-blue-500 outline-none text-sm',
+                                        placeholder: 'Optional notes (e.g., form tips, tempo, rest time)'
+                                    })
+                                ),
                                 e('div', { className: 'space-y-2' },
                                     exercise.sets.map((set, setIdx) =>
                                         e('div', { key: setIdx, className: 'flex items-center gap-3' },
@@ -711,7 +753,20 @@
                                 onClick: nextSet,
                                 className: 'p-6 bg-blue-600 rounded-full hover:bg-blue-700 mt-8'
                             }, e(ArrowRight, { size: 40 }))
-                        )
+                        ),
+                        currentExercise.notes ? e('div', { className: 'mt-6 px-4 text-center' },
+                            e('div', { 
+                                className: 'text-gray-300 text-base leading-snug',
+                                style: { 
+                                    maxWidth: '600px',
+                                    margin: '0 auto',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: '2',
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden'
+                                }
+                            }, currentExercise.notes)
+                        ) : null
                     )
                 );
             }
