@@ -110,7 +110,7 @@
     
     <script>
         // Register service worker for PWA
-        const APP_VERSION = '2.5.0'; // Update this with each new version!
+        const APP_VERSION = '2.5.1'; // Update this with each new version!
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register(`sw.js?v=${APP_VERSION}`).catch(() => {
@@ -126,42 +126,53 @@
             }, 100);
         });
 
-        // Handle orientation changes to prevent zoom issues
-        window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-                window.scrollTo(0, 1);
-                // Force viewport recalculation
-                const viewport = document.querySelector('meta[name=viewport]');
-                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
-                document.body.style.height = window.innerHeight + 'px';
-                setTimeout(() => {
-                    document.body.style.height = '100dvh';
-                }, 100);
-            }, 100);
-        });
+        // Track initial dimensions to detect screen changes
+        let lastWidth = window.innerWidth;
+        let lastHeight = window.innerHeight;
 
-        // Force proper viewport on resize with more aggressive reset
-        window.addEventListener('resize', () => {
+        // Comprehensive screen change handler for foldable devices
+        const handleScreenChange = () => {
+            const currentWidth = window.innerWidth;
+            const currentHeight = window.innerHeight;
+            
+            // Check if there's a significant dimension change (indicating screen change)
+            const widthDiff = Math.abs(currentWidth - lastWidth);
+            const heightDiff = Math.abs(currentHeight - lastHeight);
+            
+            // If significant change (more than 100px in any dimension), force reload
+            if (widthDiff > 100 || heightDiff > 100) {
+                console.log('Screen change detected, reloading...');
+                lastWidth = currentWidth;
+                lastHeight = currentHeight;
+                window.location.reload();
+                return;
+            }
+            
+            // Otherwise just reset viewport
             const viewport = document.querySelector('meta[name=viewport]');
             viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+            window.scrollTo(0, 0);
             
-            // Use visual viewport API if available
-            if (window.visualViewport) {
-                const scale = window.visualViewport.scale;
-                if (scale !== 1) {
-                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
-                }
-            }
+            lastWidth = currentWidth;
+            lastHeight = currentHeight;
+        };
+
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(handleScreenChange, 100);
+        });
+
+        // Handle resize events
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(handleScreenChange, 150);
         });
 
         // Additional check for screen changes (cover screen open/close)
         if (window.screen && window.screen.orientation) {
             window.screen.orientation.addEventListener('change', () => {
-                setTimeout(() => {
-                    const viewport = document.querySelector('meta[name=viewport]');
-                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
-                    window.scrollTo(0, 0);
-                }, 100);
+                setTimeout(handleScreenChange, 100);
             });
         }
 
